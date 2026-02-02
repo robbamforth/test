@@ -4,7 +4,7 @@ from datetime import timedelta
 import aiohttp
 import async_timeout
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_API_KEY
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_API_KEY, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -79,6 +79,9 @@ class CommandRunnerCoordinator(DataUpdateCoordinator):
                     if response.status == 401:
                         raise UpdateFailed("Unauthorized: Invalid or missing API key")
 
+                    if response.status == 403:
+                        raise UpdateFailed("Forbidden: Server has no API keys configured")
+
                     response.raise_for_status()
                     data = await response.json()
 
@@ -106,6 +109,10 @@ class CommandRunnerCoordinator(DataUpdateCoordinator):
                     if response.status == 401:
                         _LOGGER.error("Unauthorized: Invalid or missing API key")
                         return {"success": False, "error": "Unauthorized"}
+
+                    if response.status == 403:
+                        _LOGGER.error("Forbidden: Server has no API keys configured")
+                        return {"success": False, "error": "Forbidden"}
 
                     response.raise_for_status()
                     result = await response.json()

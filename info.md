@@ -1,40 +1,23 @@
-# Command Runner Integration - Secure Edition
+# Command Runner - Secure Mac Control
 
-Control your Mac from Home Assistant with API key authentication!
-
-## 🔒 New in v2.0: API Key Authentication
-
-Secure your Mac with API keys. Only authorized clients can execute commands.
+🔒 **Secure by default** - Requires API key authentication
 
 ## Quick Setup
 
-1. **Generate API Key on Mac:**
-   - Open Command Runner → Settings
-   - Click "Generate Key..."
-   - Enter name: "Home Assistant"
-   - Copy the key
-
-2. **Add Integration:**
-   - Enter Mac IP address
-   - Enter port (default: 8080)
-   - **Paste API key**
-   - Click Submit
-
-3. **Done!** All enabled commands appear as buttons.
+1. **Mac:** Command Runner → Settings → Generate Key
+2. **Home Assistant:** Add Integration → Enter IP, Port, and API Key
+3. **Done!** All commands appear as buttons
 
 ## Features
 
-✅ Secure API key authentication  
+✅ API key authentication (required)  
 ✅ Auto-discovery of commands  
 ✅ Real-time updates  
-✅ Button entities for easy control  
-✅ Local network - no cloud  
-✅ Multiple key support  
+✅ Button entities  
+✅ Local network only  
 
 ## Security
 
-- Generate unique keys for each client
-- Delete unused keys anytime
-- No keys = legacy mode (not recommended)
-
-Perfect for secure home automation!
+- Server requires at least one API key to function
+- All requests must include valid `X-API-Key` header
+- Keys are generated and managed in Command Runner Settings

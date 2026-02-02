@@ -18,7 +18,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST, default="192.168.1.100"): str,
         vol.Required(CONF_PORT, default=8080): int,
-        vol.Optional(CONF_API_KEY, default=""): str,
+        vol.Required(CONF_API_KEY): str,
     }
 )
 
@@ -42,6 +42,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             ) as response:
                 if response.status == 401:
                     raise InvalidAuth("Invalid API key")
+
+                if response.status == 403:
+                    raise NoAPIKeys("Server has no API keys configured")
 
                 response.raise_for_status()
                 result = await response.json()
@@ -74,6 +77,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 info = await validate_input(self.hass, user_input)
             except InvalidAuth:
                 errors["base"] = "invalid_auth"
+            except NoAPIKeys:
+                errors["base"] = "no_api_keys"
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except Exception:  # pylint: disable=broad-except
@@ -96,3 +101,7 @@ class CannotConnect(Exception):
 
 class InvalidAuth(Exception):
     """Error to indicate invalid authentication."""
+
+
+class NoAPIKeys(Exception):
+    """Error to indicate server has no API keys configured."""

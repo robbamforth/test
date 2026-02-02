@@ -1,227 +1,77 @@
-# Command Runner Integration for Home Assistant
+# Command Runner - Secure Mac Control for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
+Control your Mac remotely from Home Assistant with API key authentication.
 
-Securely control your Mac remotely from Home Assistant using the Command Runner app.
+## 🔒 Security First
 
-## 🔒 Version 2.0 - Now with API Key Authentication
-
-This version adds **API key authentication** for secure access to your Mac.
-
-## Features
-
-- 🔐 **Secure Authentication** - API key-based authentication
-- 🎯 **Button Entities** - Each enabled command becomes a button
-- 🔄 **Auto-Discovery** - Automatically detects all available commands
-- 📊 **Real-time Updates** - Polls for new commands every 30 seconds
-- 🏠 **Local Control** - No cloud required, works on your local network
-- 📱 **Easy Setup** - Simple configuration with IP, port, and API key
-
-## Prerequisites
-
-1. **Command Runner app** v2.0+ installed and running on your Mac
-2. Mac and Home Assistant on the same network
-3. **API Key** generated from Command Runner Settings
+This integration requires API key authentication. The server will reject all requests until you:
+1. Generate at least one API key in Command Runner Settings
+2. Provide that key when setting up the integration
 
 ## Installation
 
-### HACS (Recommended)
+### Via HACS (Recommended)
 
-1. Open HACS in Home Assistant
-2. Click the three dots in the top right corner
-3. Select "Custom repositories"
-4. Add this repository URL: `https://github.com/yourusername/command_runner`
-5. Select category: "Integration"
-6. Click "Add"
-7. Find "Command Runner" in HACS and click "Download"
-8. Restart Home Assistant
+1. Open HACS → Integrations
+2. Click ⋮ → Custom repositories
+3. Add: `https://github.com/yourusername/command_runner`
+4. Category: Integration
+5. Find "Command Runner" and click Download
+6. Restart Home Assistant
 
-### Manual Installation
+### Manual
 
-1. Download the `command_runner` folder
-2. Copy it to `config/custom_components/command_runner`
-3. Restart Home Assistant
+1. Copy `custom_components/command_runner` to your HA `custom_components` directory
+2. Restart Home Assistant
 
-## Configuration
+## Setup
 
-### Step 1: Generate API Key on Mac
+### 1. Generate API Key on Mac
 
-1. Open **Command Runner** on your Mac
-2. Go to **Settings** (⌘,)
-3. Click **Generate Key...**
-4. Enter a name: `Home Assistant`
-5. Click **Generate**
-6. **Copy the API key** (you won't see it again!)
+1. Open Command Runner on your Mac
+2. Go to Settings (⌘,)
+3. Click "Generate Key..."
+4. Name: "Home Assistant"
+5. **Copy the generated key** (you won't see it again!)
 
-### Step 2: Add Integration in Home Assistant
+### 2. Add Integration in Home Assistant
 
-1. Go to **Settings** → **Devices & Services**
-2. Click **+ Add Integration**
-3. Search for "Command Runner"
-4. Enter:
-   - **IP Address**: Your Mac's IP (e.g., `192.168.1.100`)
-   - **Port**: `8080` (or your custom port)
+1. Settings → Devices & Services → Add Integration
+2. Search: "Command Runner"
+3. Enter:
+   - **IP Address**: Your Mac's IP (e.g., 192.168.1.100)
+   - **Port**: 8080 (or your custom port)
    - **API Key**: Paste the key you copied
-5. Click **Submit**
+4. Submit
 
-The integration will:
-- Connect securely to your Mac
-- Fetch all enabled commands
-- Create button entities for each command
+## Error Messages
 
-## Security
-
-### Why API Keys?
-
-Without API keys, anyone on your network could execute commands on your Mac. API keys ensure only authorized clients (like Home Assistant) can access your Mac.
-
-### Best Practices
-
-✅ **Generate a unique key** for each client  
-✅ **Name your keys** (e.g., "Home Assistant", "iPhone")  
-✅ **Delete unused keys** when no longer needed  
-✅ **Never share your keys** publicly  
-✅ **Regenerate keys** if compromised  
-
-### No API Keys (Legacy Mode)
-
-If you don't generate any API keys in Command Runner, the server works without authentication (like version 1.0). This is **not recommended** for security reasons.
+| Error | Solution |
+|-------|----------|
+| "Server has no API keys configured" | Generate a key in Command Runner Settings on your Mac |
+| "Invalid API key" | Check you copied the entire key correctly |
+| "Cannot connect" | Verify IP address, port, and that Command Runner is running |
 
 ## Usage
 
-### In Home Assistant
-
-Each command appears as a button entity:
-- `button.open_calculator`
-- `button.lock_screen`
-- `button.say_hello`
-
-Press any button to execute the command on your Mac.
-
-### Automations Example
-
-```yaml
-automation:
-  - alias: "Lock Mac at midnight"
-    trigger:
-      platform: time
-      at: "00:00:00"
-    action:
-      service: button.press
-      target:
-        entity_id: button.lock_screen
-
-  - alias: "Open Calculator when arriving home"
-    trigger:
-      platform: state
-      entity_id: person.you
-      to: "home"
-    action:
-      service: button.press
-      target:
-        entity_id: button.open_calculator
-```
-
-### Lovelace Card Example
-
-```yaml
-type: entities
-title: Mac Commands
-entities:
-  - button.open_calculator
-  - button.open_safari
-  - button.lock_screen
-  - button.say_hello
-```
+Each enabled command appears as a button entity that you can use in automations and dashboards.
 
 ## Troubleshooting
 
-### Cannot Connect
+**403 Forbidden Error:**
+- The Mac server has no API keys configured
+- Solution: Open Command Runner → Settings → Generate Key
 
-1. Verify Command Runner is running on your Mac
-2. Check the IP address: `System Settings → Network`
-3. Ensure port is correct (check Command Runner → Settings)
-4. Test connection: `curl http://YOUR_IP:8080/commands -H "X-API-Key: YOUR_KEY"`
-5. Check firewall settings on your Mac
+**401 Unauthorized Error:**
+- Invalid or missing API key
+- Solution: Verify the API key in Integration settings
 
-### Invalid API Key
-
-1. Verify you copied the entire key
-2. Check the key hasn't been deleted in Command Runner
-3. Generate a new key if needed
-4. Update the integration with the new key
-
-### Commands Not Appearing
-
-1. Open Command Runner on your Mac
-2. Verify commands are enabled (checkboxes ticked)
-3. In Home Assistant, reload the integration
-
-### Command Execution Fails
-
-1. Test command directly in Command Runner app
-2. Check Home Assistant logs
-3. Verify command is still enabled
-4. Check API key is still valid
-
-## Upgrading from v1.0
-
-If upgrading from version 1.0 (no API keys):
-
-1. Update Command Runner app on your Mac
-2. Generate an API key in Settings
-3. In Home Assistant:
-   - Go to **Settings** → **Devices & Services**
-   - Find Command Runner integration
-   - Click **Configure**
-   - Enter the API key
-   - Save
-
-## Advanced
-
-### Command Attributes
-
-Each button entity includes attributes:
-- `command` - The actual shell command
-- `allow_parameters` - Whether parameters are supported
-- `voice_trigger` - Voice trigger phrase
-
-Access in automations:
-```yaml
-{{ state_attr('button.open_calculator', 'command') }}
-```
-
-### Multiple Macs
-
-You can add multiple Mac computers:
-1. Each Mac needs Command Runner installed
-2. Add the integration once per Mac
-3. Each will have its own set of button entities
-
-### API Key Management
-
-In Command Runner Settings, you can:
-- See all generated keys
-- View creation dates
-- Delete unused keys
-- Generate new keys for different clients
-
-## Support
-
-- Report issues: https://github.com/yourusername/command_runner/issues
-- Discussions: https://github.com/yourusername/command_runner/discussions
-
-## Changelog
-
-### v2.0.0
-- ✨ Added API key authentication
-- 🔒 Improved security
-- 📝 Better error messages
-- 🐛 Bug fixes
-
-### v1.0.0
-- 🎉 Initial release
+**Connection Failed:**
+- Check Mac IP address
+- Verify port number
+- Ensure Command Runner is running
+- Check firewall settings
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT
