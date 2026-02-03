@@ -1,7 +1,7 @@
 """Sensor platform for Command Runner."""
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
@@ -258,5 +258,5 @@ class CommandRunnerLastRequestSensor(CoordinatorEntity, SensorEntity):
         if status_data:
             last_request = status_data.get("lastRequestTime", 0)
             if last_request > 0:
-                return datetime.fromtimestamp(last_request)
+                return datetime.fromtimestamp(last_request, tz=timezone.utc)
         return None
