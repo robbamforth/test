@@ -1,77 +1,91 @@
-# Command Runner - Secure Mac Control for Home Assistant
+# Command Runner
 
-Control your Mac remotely from Home Assistant with API key authentication.
+A macOS application that allows you to remotely execute commands on your Mac via HTTP API.
 
-## 🔒 Security First
+## Features
 
-This integration requires API key authentication. The server will reject all requests until you:
-1. Generate at least one API key in Command Runner Settings
-2. Provide that key when setting up the integration
+- Execute shell commands remotely via HTTP
+- Manage commands through a user-friendly interface
+- Status bar menu for quick access
+- Enable/disable individual commands
+- Support for command parameters
+- Built-in HTTP server on port 8080
 
 ## Installation
 
-### Via HACS (Recommended)
-
-1. Open HACS → Integrations
-2. Click ⋮ → Custom repositories
-3. Add: `https://github.com/yourusername/command_runner`
-4. Category: Integration
-5. Find "Command Runner" and click Download
-6. Restart Home Assistant
-
-### Manual
-
-1. Copy `custom_components/command_runner` to your HA `custom_components` directory
-2. Restart Home Assistant
-
-## Setup
-
-### 1. Generate API Key on Mac
-
-1. Open Command Runner on your Mac
-2. Go to Settings (⌘,)
-3. Click "Generate Key..."
-4. Name: "Home Assistant"
-5. **Copy the generated key** (you won't see it again!)
-
-### 2. Add Integration in Home Assistant
-
-1. Settings → Devices & Services → Add Integration
-2. Search: "Command Runner"
-3. Enter:
-   - **IP Address**: Your Mac's IP (e.g., 192.168.1.100)
-   - **Port**: 8080 (or your custom port)
-   - **API Key**: Paste the key you copied
-4. Submit
-
-## Error Messages
-
-| Error | Solution |
-|-------|----------|
-| "Server has no API keys configured" | Generate a key in Command Runner Settings on your Mac |
-| "Invalid API key" | Check you copied the entire key correctly |
-| "Cannot connect" | Verify IP address, port, and that Command Runner is running |
+1. Open `CommandRunner.xcodeproj` in Xcode
+2. Build and run the project (Cmd+R)
+3. The app will appear in your menu bar
 
 ## Usage
 
-Each enabled command appears as a button entity that you can use in automations and dashboards.
+### Managing Commands
 
-## Troubleshooting
+1. Click the terminal icon in your menu bar to open the main window
+2. Use the "Add" button to create new commands
+3. Select a command and click "Edit" to modify it
+4. Use "Test" to execute a command locally
+5. Use "Remove" to delete commands
 
-**403 Forbidden Error:**
-- The Mac server has no API keys configured
-- Solution: Open Command Runner → Settings → Generate Key
+### Remote Execution
 
-**401 Unauthorized Error:**
-- Invalid or missing API key
-- Solution: Verify the API key in Integration settings
+From any Mac on your network, use curl:
 
-**Connection Failed:**
-- Check Mac IP address
-- Verify port number
-- Ensure Command Runner is running
-- Check firewall settings
+```bash
+# List all available commands
+curl http://YOUR_MAC_IP:8080/commands
+
+# Execute a specific command
+curl http://YOUR_MAC_IP:8080/run/Open%20Calculator
+
+# Execute with parameters
+curl "http://YOUR_MAC_IP:8080/run/MyCommand?params=value"
+```
+
+### API Endpoints
+
+- `GET /` - Welcome page
+- `GET /commands` - List all enabled commands
+- `GET /run/{commandName}` - Execute a command
+- `GET /run/{commandName}?params=value` - Execute with parameters
+
+## Security
+
+⚠️ **Warning**: This app executes shell commands without authentication. Only use on trusted networks.
+
+## Requirements
+
+- macOS 13.0 or later
+- Xcode 14.0 or later
+- Swift 5.0 or later
 
 ## License
 
-MIT
+MIT License
+
+## Sensors
+
+The integration provides the following sensors to monitor your Command Runner server:
+
+- **Status**: Current server status (running/stopped)
+- **Version**: Application version
+- **Port**: Server port number
+- **Uptime**: Server uptime in seconds with formatted display (e.g., "2d 5h 30m")
+- **Total Requests**: Total number of requests handled since server start
+- **Requests Processing**: Current number of requests being processed
+- **API Keys Configured**: Whether API keys are configured (Yes/No)
+- **Last Request**: Timestamp of the last request received
+
+All sensors update every 30 seconds automatically.
+
+## Version History
+
+### v1.1.0
+- Added server status sensors
+- Added `/status` endpoint support
+- Enhanced monitoring capabilities
+
+### v1.0.0
+- Initial release
+- Button entities for command execution
+- API key authentication support
